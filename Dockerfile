@@ -1,14 +1,19 @@
-# Use Java 17
-FROM eclipse-temurin:17-jdk
+# Build Stage
+FROM gradle:8.7-jdk17 AS build
 
-# Create app directory
 WORKDIR /app
 
-# Copy jar file
-COPY build/libs/*.jar app.jar
+COPY . .
 
-# Expose port
+RUN gradle bootJar --no-daemon
+
+# Run Stage
+FROM eclipse-temurin:17-jre
+
+WORKDIR /app
+
+COPY --from=build /app/build/libs/*.jar app.jar
+
 EXPOSE 8080
 
-# Run application
 ENTRYPOINT ["java","-jar","app.jar"]
